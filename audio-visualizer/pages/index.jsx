@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import * as THREE from "three";
-import SceneInit from "./lib/SceneInit";
-import CustomEditor from "./components/CustomEditor";
-import { vertexShader, fragmentShader } from "./lib/Shaders";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import Stats from "three/examples/jsm/libs/stats.module";
+import {SceneInit} from "./lib/SceneInit";
+import vShader from "./lib/vShader";
+import fShader from "./lib/fShader";
 
 export default function Home() {
   let test, audioContext, audioElement, dataArray, analyser, source;
@@ -11,6 +13,7 @@ export default function Home() {
   const initGui = async () => {
     const dat = await import("dat.gui");
     gui = new dat.GUI();
+    gui.close();
   };
 
   const setupAudioContext = () => {
@@ -47,20 +50,25 @@ export default function Home() {
     };
 
     // note: uncomment these geometries to see different visualizations
-    // const planeGeometry = new THREE.BoxGeometry(64, 64, 8, 64, 64, 8);
+    const planeGeometry = new THREE.BoxGeometry(64, 64, 8, 64, 64, 8);
     // const planeGeometry = new THREE.SphereGeometry(16, 64, 64);
 
     // note: set up plane mesh and add it to the scene
-    const planeGeometry = new THREE.PlaneGeometry(64, 64, 64, 64);
-    // const planeMaterial = new THREE.MeshNormalMaterial({ wireframe: true });
-    // const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+    //const planeGeometry = new THREE.PlaneGeometry(64, 64, 64, 64);
+    const planeMaterial = new THREE.MeshNormalMaterial({ wireframe: true });
+    //const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
     const planeCustomMaterial = new THREE.ShaderMaterial({
       // note: this is where the magic happens
       uniforms: uniforms,
-      vertexShader: vertexShader(),
-      fragmentShader: fragmentShader(),
+      vertexShader: vShader(),
+      fragmentShader: fShader(),
       wireframe: true,
     });
+
+    // LIGHT
+	  const light = new THREE.AmbientLight(0xffffff);
+	  //light.position.set(-100,200,100);
+	  test.scene.add(light);
     const planeMesh = new THREE.Mesh(planeGeometry, planeCustomMaterial);
     planeMesh.rotation.x = -Math.PI / 2 + Math.PI / 4;
     planeMesh.scale.x = 2;
@@ -103,18 +111,20 @@ export default function Home() {
     test.animate();
   }, []);
 
-  // note: Custom editor helpers.
+  //note: Custom editor helpers.
   // const [showCustomEditor, setShowCustomEditor] = useState(false);
   // const toggleCustomEditor = () => {
   //   setShowCustomEditor(!showCustomEditor);
   // };
 
   return (
+    <>
+    <SceneInit/>
     <div className="flex flex-col items-center justify-center">
       <div className="absolute bottom-2 right-2">
         <audio
           id="myAudio"
-          src="./fur_elise.mp3"
+          src="./MOBAMBA.mp3"
           className="w-80"
           controls
           autoPlay
@@ -129,5 +139,6 @@ export default function Home() {
       <canvas id="myThreeJsCanvas"></canvas>
       {/* {showCustomEditor ? <CustomEditor /> : null} */}
     </div>
+    </>
   );
 }
